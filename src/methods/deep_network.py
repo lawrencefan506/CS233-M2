@@ -208,18 +208,20 @@ class Trainer(object):
                 with N the number of data points in the validation/test data.
         """
         self.model.eval()
+        pred_labels = []
         with torch.no_grad():
-            acc_run = 0
-            for it, batch in enumerate(dataloader):
-                # Get batch of data.
-                x, y = batch
-                curr_bs = x.shape[0]
-                acc_run += accuracy(self.model(x), y) * curr_bs
-            acc = acc_run / len(dataloader.dataset)
+            for batch in dataloader:
+                for sample in batch:
+                    outputs = self.model(sample)
+                    _, predicted = torch.max(outputs, 1)
+                    pred_labels.append(predicted)
+                    #outputs = self.model(inputs)  # Forward pass through the model
+                    #_, predicted = torch.max(outputs, 1) 
 
-            print(', accuracy test: {:.2f}'.format(acc))
-        
-        return self.predict(dataloader)
+                #print(', accuracy test: {:.2f}'.format(acc))
+        print(pred_labels)
+        pred_labels = torch.tensor(pred_labels)
+        return pred_labels
     
     def fit(self, training_data, training_labels):
         """
