@@ -25,6 +25,13 @@ class MLP(nn.Module):
             n_classes (int): number of classes to predict
         """
         super().__init__()
+        self.layers = nn.Sequential(
+        nn.Linear(input_size, 64),
+        nn.ReLU(),
+        nn.Linear(64, 32),
+        nn.ReLU(),
+        nn.Linear(32, n_classes)
+        )
         ##
         ###
         #### WRITE YOUR CODE HERE! 
@@ -46,8 +53,8 @@ class MLP(nn.Module):
         #### WRITE YOUR CODE HERE! 
         ###
         ##
+        preds = self.layers(x)
         return preds
-
 
 class CNN(nn.Module):
     """

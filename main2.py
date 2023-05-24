@@ -9,6 +9,7 @@ from src.methods.pca import PCA
 from src.methods.deep_network import MLP, CNN, Trainer
 from src.utils import normalize_fn, append_bias_term, accuracy_fn, macrof1_fn, get_n_classes
 
+import torch
 
 def main(args):
     """
@@ -28,14 +29,30 @@ def main(args):
 
     ## 2. Then we must prepare it. This is were you can create a validation set,
     #  normalize, add bias, etc.
-
+    
+    # shuffling data
+    np.random.seed(0)
+    rinds = np.random.permutation(len(xtrain))  # shuffling of the indices to shuffle the data
+    
     # Make a validation set
     if not args.test:
-        ### WRITE YOUR CODE HERE
-        pass
+        #make new xtest as some of xtrain, same for y
+        fraction_train = 0.8  # 80% of data is reserved for training, so 20% for testing
+        n_train = int(len(xtrain) * fraction_train)
+        xtest = xtrain[rinds[n_train:]] 
+        ytest = ytrain[rinds[n_train:]] 
+        xtrain = xtrain[rinds[:n_train]] 
+        ytrain = ytrain[rinds[:n_train]] 
+    else:
+        xtrain = xtrain[rinds]
+        ytrain = ytrain[rinds]
     
     ### WRITE YOUR CODE HERE to do any other data processing
-
+    #normalise
+    meantrain = xtrain.mean(0,keepdims=True)
+    stdtrain  = xtrain.std(0,keepdims=True)
+    xtrain = normalize_fn(xtrain,meantrain,stdtrain)
+    xtest = normalize_fn(xtest,meantrain,stdtrain)
 
     # Dimensionality reduction (MS2)
     if args.use_pca:
@@ -54,7 +71,9 @@ def main(args):
         # Note: you might need to reshape the image data depending on the network you use!
         n_classes = get_n_classes(ytrain)
         if args.nn_type == "mlp":
-            model = ...  ### WRITE YOUR CODE HERE
+            torch.manual_seed(42)
+            model = MLP( len(xtrain[0]), n_classes)  ### WRITE YOUR CODE HERE
+
 
         elif args.nn_type == "cnn":
             ### WRITE YOUR CODE HERE
