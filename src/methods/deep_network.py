@@ -214,12 +214,12 @@ class Trainer(object):
                 for sample in batch:
                     outputs = self.model(sample)
                     _, predicted = torch.max(outputs, 1)
-                    pred_labels.append(predicted)
+                    pred_labels.extend(predicted)
                     #outputs = self.model(inputs)  # Forward pass through the model
                     #_, predicted = torch.max(outputs, 1) 
 
                 #print(', accuracy test: {:.2f}'.format(acc))
-        print(pred_labels)
+        #print(pred_labels)
         pred_labels = torch.tensor(pred_labels)
         return pred_labels
     
