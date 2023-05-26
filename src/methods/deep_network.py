@@ -3,7 +3,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import TensorDataset, DataLoader
 from helpers import accuracy 
-
 ## MS2
     
 class MLP(nn.Module):
@@ -26,11 +25,13 @@ class MLP(nn.Module):
         """
         super().__init__()
         self.layers = nn.Sequential(
-        nn.Linear(input_size, 128),
+        nn.Linear(input_size, 64),
         nn.ReLU(),
-        nn.Linear(128, 64),
-        nn.ReLU(),
-        # nn.Linear(128, 128),
+        # nn.Linear(128, 64),
+        # nn.ReLU(),
+        # nn.Linear(64, 32),
+        # nn.ReLU(),
+        # nn.Linear(32, 16),
         # nn.ReLU(),
         nn.Linear(64, n_classes)
         )

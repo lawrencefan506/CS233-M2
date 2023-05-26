@@ -10,6 +10,9 @@ from src.methods.deep_network import MLP, CNN, Trainer
 from src.utils import normalize_fn, append_bias_term, accuracy_fn, macrof1_fn, get_n_classes
 
 import torch
+import time
+import matplotlib.pyplot as plt
+from csv import writer
 
 def main(args):
     """
@@ -43,9 +46,11 @@ def main(args):
         ytest = ytrain[rinds[n_train:]] 
         xtrain = xtrain[rinds[:n_train]] 
         ytrain = ytrain[rinds[:n_train]] 
+        iftest = 0
     else:
         xtrain = xtrain[rinds]
         ytrain = ytrain[rinds]
+        iftest = 1
     
     ### WRITE YOUR CODE HERE to do any other data processing
     #normalise
@@ -101,22 +106,56 @@ def main(args):
     ## 4. Train and evaluate the method
 
     # Fit (:=train) the method on the training data
+    s1 = time.time()
     preds_train = method_obj.fit(xtrain, ytrain)
-        
+    s2 = time.time()
+    print('')
+    train_time = s2 - s1
+    print("Training Time: ", train_time, " seconds.")
+
     # Predict on unseen data
+    s1 = time.time()
     preds = method_obj.predict(xtest)
+    s2 = time.time()
+    test_time = s2 - s1
+    print("Testing Time: ", test_time, " seconds.")
 
 
     ## Report results: performance on train and valid/test sets
     acc = accuracy_fn(preds_train, ytrain)
-    macrof1 = macrof1_fn(preds_train, ytrain)
-    print(f"\nTrain set: accuracy = {acc:.3f}% - F1-score = {macrof1:.6f}")
+    train_macrof1 = macrof1_fn(preds_train, ytrain)
+    d1 = [acc/100.0,train_macrof1]
+    print(f"\nTrain set: accuracy = {acc:.3f}% - F1-score = {train_macrof1:.6f}")
 
     acc = accuracy_fn(preds, ytest)
-    macrof1 = macrof1_fn(preds, ytest)
-    print(f"Test set:  accuracy = {acc:.3f}% - F1-score = {macrof1:.6f}")
+    test_macrof1 = macrof1_fn(preds, ytest)
+    d2 = [acc/100.0,test_macrof1]
+    print(f"Test set:  accuracy = {acc:.3f}% - F1-score = {test_macrof1:.6f}")
 
-    ### WRITE YOUR CODE HERE if you want to add other outputs, visualization, etc.
+
+    if args.method == "nn" and args.nn_type == "mlp":
+        with open('results_mlp.csv', 'a') as f_object:
+            applist = [1, [64], args.lr, args.max_iters, train_macrof1, test_macrof1, iftest, train_time, test_time ]
+            writer_object = writer(f_object)
+            writer_object.writerow(applist)
+            f_object.close()
+
+    ## WRITE YOUR CODE HERE if you want to add other outputs, visualization, etc.
+    barWidth = 0.25
+    fig = plt.subplots(figsize =(6, 6))
+    br1 = np.arange(len(d1))
+    br2 = [x + barWidth for x in br1]
+    plt.bar(br1, d1, color ='khaki', width = barWidth,
+            edgecolor ='grey', label ='Train set')
+    plt.bar(br2, d2, color ='deepskyblue', width = barWidth,
+            edgecolor ='grey', label ='Test set')
+    plt.ylim(0,1)
+    plt.title('Model performance')
+    plt.ylabel('Score', fontweight ='bold', fontsize = 15)
+    plt.xticks([r + barWidth for r in range(len(d1))],
+            ['Accuracy', 'Macro F1 Score',])
+    plt.legend()
+    #plt.show()
 
 
 if __name__ == '__main__':
